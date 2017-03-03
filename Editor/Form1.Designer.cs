@@ -28,12 +28,31 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this.patternviewer = new System.Windows.Forms.Panel();
+            this.SuspendLayout();
+            // 
+            // patternviewer
+            // 
+            this.patternviewer.Location = new System.Drawing.Point(37, 88);
+            this.patternviewer.Name = "patternviewer";
+            this.patternviewer.Size = new System.Drawing.Size(749, 563);
+            this.patternviewer.TabIndex = 0;
+            // 
+            // Form1
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(1214, 663);
+            this.Controls.Add(this.patternviewer);
+            this.Name = "Form1";
             this.Text = "Form1";
+            this.ResumeLayout(false);
+
         }
 
         #endregion
+
+        private System.Windows.Forms.Panel patternviewer;
     }
 }
 
