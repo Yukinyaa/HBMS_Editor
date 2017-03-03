@@ -18,24 +18,24 @@ namespace Editor
     public class Note
     {
         public NoteType type;
-        public float timing;
+        public double timing;
         public int hitSound;
     }
     public class ShortNote : Note
     {
-        ShortNote()
+        public ShortNote()
         {
             type = NoteType.ShortNote;
         }
-        float startpos, endpos;
+        public double startpos, endpos;
     }
     public class SlideLongNote : Note
     {
-        SlideLongNote()
+        public SlideLongNote()
         {
             type = NoteType.SlideLongNote;
         }
-        float startpos, endpos;
+        public double startpos, endpos;
     }
     
     class HBMSData
@@ -53,6 +53,34 @@ namespace Editor
         public string rankText;
         public List<HitSound> hitsounds;
         public List<Note> notes;
+        private class NoteComparer : Comparer<Note>
+        {
+            public override int Compare(Note x, Note y)
+            {
+                double diff = x.timing - y.timing;
+                return 
+                    diff==0?
+                    0:
+                    (int)diff;
+            }
+        }
+        public void SortNote()
+        {
+            notes.Sort(new NoteComparer());
+        }
+
+        public List<Note> GetNote(double segment, double length)
+        {
+            List<Note> noteList = new List<Note>();
+            foreach (Note note in notes)
+            {
+                if ((segment <= note.timing) || (note.timing <= segment))
+                {
+                    noteList.Add(note);
+                }
+            }
+            return noteList;
+        }
     }
     class Encoder
     {
