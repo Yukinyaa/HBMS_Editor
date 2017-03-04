@@ -20,6 +20,7 @@ namespace Editor
         public NoteType type;
         public double timing;
         public int hitSound;
+        public double startpos, width;
     }
     public class ShortNote : Note
     {
@@ -27,7 +28,6 @@ namespace Editor
         {
             type = NoteType.ShortNote;
         }
-        public double startpos, endpos;
     }
     public class SlideLongNote : Note
     {
@@ -35,7 +35,6 @@ namespace Editor
         {
             type = NoteType.SlideLongNote;
         }
-        public double startpos, endpos;
     }
     
     class HBMSData

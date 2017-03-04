@@ -45,7 +45,11 @@
             this.patternviewer.Size = new System.Drawing.Size(800, 600);
             this.patternviewer.TabIndex = 0;
             this.patternviewer.Scroll += new System.Windows.Forms.ScrollEventHandler(this.patternviewer_Scroll);
+            this.patternviewer.DragLeave += new System.EventHandler(this.patternviewer_DragLeave);
             this.patternviewer.Paint += new System.Windows.Forms.PaintEventHandler(this.patternviewer_Paint);
+            this.patternviewer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.patternviewer_MouseDown);
+            this.patternviewer.MouseMove += new System.Windows.Forms.MouseEventHandler(this.patternviewer_MouseMove);
+            this.patternviewer.MouseUp += new System.Windows.Forms.MouseEventHandler(this.patternviewer_MouseUp);
             // 
             // NoteTypeSelector
             // 
