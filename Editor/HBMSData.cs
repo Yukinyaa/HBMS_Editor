@@ -50,7 +50,7 @@ namespace Editor
     }
 
 
-    class HBMSData
+    public class HBMSData
     {
         public class HitSound
         {
@@ -60,8 +60,8 @@ namespace Editor
         public string title;
         public string genre;
         public double bpm;
-        public double audioDir;
-        public int rank;
+        public string audioDir;
+        public double rank;
         public string rankText;
         public List<HitSound> hitsounds;
         public List<Note> notes;
@@ -101,8 +101,8 @@ namespace Editor
             public string title;
             public string genre;
             public double bpm;
-            public double audioDir;
-            public int rank;
+            public string audioDir;
+            public double rank;
             public string rankText;
             public List<HBMSData.HitSound> hitsounds;
             public List<string> notes;

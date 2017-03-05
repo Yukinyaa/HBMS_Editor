@@ -32,7 +32,8 @@ namespace Editor
             hbd.notes.Add(
                 new ShortNote(){ timing = 0.25, startpos = 0.25, width = 0.25 }
             );
-
+            hbd.bpm = 121;
+            hbd.audioDir = "D:/lel/Festival.mp3";
             NoteTypeSelector.Items.Add("Short");
             NoteTypeSelector.Items.Add("Slide-Long");
             NoteTypeSelector.Items.Add("Track");
@@ -80,7 +81,7 @@ namespace Editor
 
         private void DrawGuideLine(Graphics g)
         {
-            Pen borderlinedrawer = new Pen(Color.White, 1);
+            Pen borderlinedrawer = new Pen(Color.White, 0.5f);
             for (int i = 0; i < numericUpDown1.Value; i++)
             {
                 int x = patternviewer.Width * (i + 1) / ((int)numericUpDown1.Value + 1);
@@ -185,10 +186,12 @@ namespace Editor
             switch(e.Type)
             {
                 case ScrollEventType.SmallDecrement:
+                case ScrollEventType.LargeDecrement:
                     now+=scale/2;
                     break;
                 case ScrollEventType.SmallIncrement:
-                    now-=scale/2;
+                case ScrollEventType.LargeIncrement:
+                    now -=scale/2;
                     break;
             }
             ReDraw();
@@ -328,30 +331,26 @@ namespace Editor
         }
 
         Thread LockTimer;
-        private void DeleteLock_CheckedChanged(object sender, EventArgs e)
+        private void DeleteLocker_Click(object sender, EventArgs e)
         {
-            
-            if (DeleteLock.Checked == true)
-            {
-                DeleteNote.Enabled = true;
-                LockTimer = new Thread(() =>
-                {
-                    Thread.CurrentThread.IsBackground = true;
-                    Thread.Sleep(5000);
-                    DeleteNote.Enabled = false;
-                    DeleteLock.Checked = false;
-                    NoteInfoPanel.Refresh();
-                });
-                LockTimer.Start();
-            }
-            else
-            {
-                DeleteNote.Enabled = false;
-                LockTimer.Abort();
-            }
-              
-        }
+            DeleteNote.Enabled = true;
+            try { LockTimer.Abort(); }catch(Exception){ }
 
+            LockTimer = new Thread(() =>
+            {
+                Thread.CurrentThread.IsBackground = true;
+                for (int time = 5; time >= 0; time--)
+                {
+                    DeleteLocker.Text = "" + time;
+                    Thread.Sleep(1000);
+                }
+                DeleteLocker.Text = "🔒";
+                DeleteNote.Enabled = false;
+                NoteInfoPanel.Refresh();
+            });
+            LockTimer.Start();
+            
+        }
         private void DeleteNote_Click(object sender, EventArgs e)
         {
             hbd.notes.Remove(SelectedNote);
@@ -360,6 +359,36 @@ namespace Editor
             DraggingNote = null;
             SelectedNote = null;
             ReDraw();
+        }
+
+        private void patternviewer_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete && DeleteNote.Enabled == true)
+            {
+                hbd.notes.Remove(SelectedNote);
+                dragging = false;
+                newnote = false;
+                DraggingNote = null;
+                SelectedNote = null;
+                ReDraw();
+            }
+            
+        }
+
+        private void MainEditor_Scroll(object sender, ScrollEventArgs e)
+        {
+            
+        }
+
+        private void SongInfo_Click(object sender, EventArgs e)
+        {
+            MusicInfoDialog mid = new MusicInfoDialog(hbd);
+            mid.Show();
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+
         }
     }
 }

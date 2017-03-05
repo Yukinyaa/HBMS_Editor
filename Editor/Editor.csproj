@@ -60,10 +60,19 @@
       <DependentUpon>MainEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="HBMSData.cs" />
+    <Compile Include="MusicInfoDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MusicInfoDialog.Designer.cs">
+      <DependentUpon>MusicInfoDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MainEditor.resx">
       <DependentUpon>MainEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MusicInfoDialog.resx">
+      <DependentUpon>MusicInfoDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
