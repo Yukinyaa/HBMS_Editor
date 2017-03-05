@@ -5,19 +5,20 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Editor
 {
-    public partial class Form1 : Form
+    public partial class MainEditor : Form
     {
         HBMSData hbd;
 
         double now=0;
         double scale = 0.5;
 
-        public Form1()
+        public MainEditor()
         {
             InitializeComponent();
 
@@ -48,13 +49,12 @@ namespace Editor
                 if (ix != e.Index) NoteTypeSelector.SetItemChecked(ix, false);
         }
 
-        
-
-
+        //drawing functions
         private int GetNoteSelectedType()
         {
             return NoteTypeSelector.CheckedIndices[0];
         }
+
         private Note NewNote(int x, int y)
         {
             Note n;
@@ -77,6 +77,7 @@ namespace Editor
             return n;
         }
 
+
         private void DrawGuideLine(Graphics g)
         {
             Pen borderlinedrawer = new Pen(Color.White, 1);
@@ -91,6 +92,7 @@ namespace Editor
         {
 
         }
+
         private void DrawNotes(Graphics g, List<Note> notes)
         {
             foreach (Note n in notes)
@@ -138,6 +140,7 @@ namespace Editor
 
             g.DrawRectangle(new Pen(c,2),RectFromNote(n,dx,dy));
         }
+
         private void DrawImaginaryNote(Graphics g)
         {
             //draw dragging note
@@ -147,17 +150,14 @@ namespace Editor
             if (SelectedNote != null)
                 g.DrawRectangle(new Pen(Color.Yellow, 1), RectFromNote(SelectedNote));
         }
-
-
+        
         List<Note> notes;
+
         private void patternviewer_Paint(object sender, PaintEventArgs e)
         {
             //draw guideline
 
             notes = hbd.GetNote(now, scale);
-
-
-
 
             //Bitmap buffer = new Bitmap(patternviewer.Width, patternviewer.Height);//set the size of the image
             //Graphics g = Graphics.FromImage(buffer);//set the graphics to draw on the image
@@ -197,7 +197,16 @@ namespace Editor
         //viewer : mouse hadling part
 
         Note DraggingNote;
-        Note SelectedNote;
+        private Note SelectedNote_;
+        private Note SelectedNote {
+            get {
+                return SelectedNote_;
+            }
+            set {
+                SelectedNote_ = value;
+                UpdateSelectedNoteToPanel();
+            }
+        }
         bool dragging = false;
         bool newnote = false;
         Point draggingDelta;
@@ -210,6 +219,7 @@ namespace Editor
                 newnote = false;
                 DraggingNote = null;
                 SelectedNote = null;
+                ReDraw();
                 return;
             }
             if (e.Button != MouseButtons.Left)
@@ -284,8 +294,72 @@ namespace Editor
             ReDraw();
         }
 
+        void UpdateSelectedNoteToPanel()
+        {
+            if (SelectedNote == null)
+            {
+                NoteInfoPanel.Enabled = false;
+                return;
+            }
 
+            NoteInfoPanel.Enabled = true;
+            TimingNum.Value = (decimal)SelectedNote.timing;
+            Widthnum.Value = (decimal)SelectedNote.width;
+            Posnum.Value = (decimal)SelectedNote.startpos;
+            NoteInfoPanel.Refresh();
+        }
 
-        
+        private void TimingNum_ValueChanged(object sender, EventArgs e)
+        {
+            SelectedNote.timing = (double)TimingNum.Value;
+            ReDraw();
+        }
+
+        private void Widthnum_ValueChanged(object sender, EventArgs e)
+        {
+            SelectedNote.width = (double)Widthnum.Value;
+            ReDraw();
+        }
+
+        private void Posnum_ValueChanged(object sender, EventArgs e)
+        {
+            SelectedNote.startpos = (double)Posnum.Value;
+            ReDraw();
+        }
+
+        Thread LockTimer;
+        private void DeleteLock_CheckedChanged(object sender, EventArgs e)
+        {
+            
+            if (DeleteLock.Checked == true)
+            {
+                DeleteNote.Enabled = true;
+                LockTimer = new Thread(() =>
+                {
+                    Thread.CurrentThread.IsBackground = true;
+                    Thread.Sleep(5000);
+                    DeleteNote.Enabled = false;
+                    DeleteLock.Checked = false;
+                    NoteInfoPanel.Refresh();
+                });
+                LockTimer.Start();
+            }
+            else
+            {
+                DeleteNote.Enabled = false;
+                LockTimer.Abort();
+            }
+              
+        }
+
+        private void DeleteNote_Click(object sender, EventArgs e)
+        {
+            hbd.notes.Remove(SelectedNote);
+            dragging = false;
+            newnote = false;
+            DraggingNote = null;
+            SelectedNote = null;
+            ReDraw();
+        }
     }
 }
