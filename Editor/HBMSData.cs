@@ -21,6 +21,18 @@ namespace Editor
         public double timing;
         public int hitSound;
         public double startpos, width;
+
+        public Note Copy(Note n)//copy note
+        {
+            Note newObject = new Note();
+
+            newObject.timing = n.timing;
+            newObject.startpos = n.startpos;
+            newObject.width = n.width;
+
+
+            return newObject;
+        }
     }
     public class ShortNote : Note
     {
@@ -36,7 +48,8 @@ namespace Editor
             type = NoteType.SlideLongNote;
         }
     }
-    
+
+
     class HBMSData
     {
         public class HitSound
