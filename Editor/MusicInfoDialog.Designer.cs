@@ -134,6 +134,11 @@
             // 
             this.BPM.DecimalPlaces = 2;
             this.BPM.Location = new System.Drawing.Point(93, 70);
+            this.BPM.Maximum = new decimal(new int[] {
+            9999,
+            0,
+            0,
+            0});
             this.BPM.Name = "BPM";
             this.BPM.Size = new System.Drawing.Size(100, 21);
             this.BPM.TabIndex = 12;

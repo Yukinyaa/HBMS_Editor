@@ -30,6 +30,9 @@
         {
             this.NoteTypeSelector = new System.Windows.Forms.CheckedListBox();
             this.NoteInfoPanel = new System.Windows.Forms.Panel();
+            this.DeleteLocker = new System.Windows.Forms.Button();
+            this.NoteInfoText = new System.Windows.Forms.Label();
+            this.DeleteNote = new System.Windows.Forms.Button();
             this.width_pos_text = new System.Windows.Forms.Label();
             this.Posnum = new System.Windows.Forms.NumericUpDown();
             this.Widthnum = new System.Windows.Forms.NumericUpDown();
@@ -42,14 +45,17 @@
             this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
             this.Play = new System.Windows.Forms.Button();
-            this.DeleteNote = new System.Windows.Forms.Button();
-            this.NoteInfoText = new System.Windows.Forms.Label();
-            this.DeleteLocker = new System.Windows.Forms.Button();
             this.vScrollBar1 = new System.Windows.Forms.VScrollBar();
             this.SongInfo = new System.Windows.Forms.Button();
-            this.trackBar1 = new System.Windows.Forms.TrackBar();
-            this.VerticalSnapText = new System.Windows.Forms.Label();
-            this.VSnapIndecator = new System.Windows.Forms.Label();
+            this.BSnapTrackBar = new System.Windows.Forms.TrackBar();
+            this.BeatSnapText = new System.Windows.Forms.Label();
+            this.BSnapIndecator = new System.Windows.Forms.Label();
+            this.PositionText = new System.Windows.Forms.Label();
+            this.SmallBeat = new System.Windows.Forms.NumericUpDown();
+            this.LargeBeat = new System.Windows.Forms.NumericUpDown();
+            this.SaveBtn = new System.Windows.Forms.Button();
+            this.OpenBtn = new System.Windows.Forms.Button();
+            this.Position = new System.Windows.Forms.TextBox();
             this.patternviewer = new BeatmapViewer();
             this.NoteInfoPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Posnum)).BeginInit();
@@ -57,14 +63,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.TimingNum)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.BSnapTrackBar)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SmallBeat)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.LargeBeat)).BeginInit();
             this.SuspendLayout();
             // 
             // NoteTypeSelector
             // 
             this.NoteTypeSelector.AccessibleRole = System.Windows.Forms.AccessibleRole.TitleBar;
             this.NoteTypeSelector.FormattingEnabled = true;
-            this.NoteTypeSelector.Location = new System.Drawing.Point(1062, 87);
+            this.NoteTypeSelector.Location = new System.Drawing.Point(719, 383);
             this.NoteTypeSelector.Name = "NoteTypeSelector";
             this.NoteTypeSelector.Size = new System.Drawing.Size(140, 180);
             this.NoteTypeSelector.TabIndex = 1;
@@ -84,10 +92,41 @@
             this.NoteInfoPanel.Controls.Add(this.TimingNum);
             this.NoteInfoPanel.Controls.Add(this.TimingText);
             this.NoteInfoPanel.Enabled = false;
-            this.NoteInfoPanel.Location = new System.Drawing.Point(850, 87);
+            this.NoteInfoPanel.Location = new System.Drawing.Point(719, 74);
             this.NoteInfoPanel.Name = "NoteInfoPanel";
-            this.NoteInfoPanel.Size = new System.Drawing.Size(206, 229);
+            this.NoteInfoPanel.Size = new System.Drawing.Size(206, 303);
             this.NoteInfoPanel.TabIndex = 2;
+            // 
+            // DeleteLocker
+            // 
+            this.DeleteLocker.Font = new System.Drawing.Font("Gulim", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.DeleteLocker.Location = new System.Drawing.Point(98, 277);
+            this.DeleteLocker.Name = "DeleteLocker";
+            this.DeleteLocker.Size = new System.Drawing.Size(24, 23);
+            this.DeleteLocker.TabIndex = 10;
+            this.DeleteLocker.Text = "🔒";
+            this.DeleteLocker.UseVisualStyleBackColor = true;
+            this.DeleteLocker.Click += new System.EventHandler(this.DeleteLocker_Click);
+            // 
+            // NoteInfoText
+            // 
+            this.NoteInfoText.AutoSize = true;
+            this.NoteInfoText.Location = new System.Drawing.Point(11, 13);
+            this.NoteInfoText.Name = "NoteInfoText";
+            this.NoteInfoText.Size = new System.Drawing.Size(55, 12);
+            this.NoteInfoText.TabIndex = 9;
+            this.NoteInfoText.Text = "Note Info";
+            // 
+            // DeleteNote
+            // 
+            this.DeleteNote.Enabled = false;
+            this.DeleteNote.Location = new System.Drawing.Point(128, 277);
+            this.DeleteNote.Name = "DeleteNote";
+            this.DeleteNote.Size = new System.Drawing.Size(75, 23);
+            this.DeleteNote.TabIndex = 8;
+            this.DeleteNote.Text = "Delete";
+            this.DeleteNote.UseVisualStyleBackColor = true;
+            this.DeleteNote.Click += new System.EventHandler(this.DeleteNote_Click);
             // 
             // width_pos_text
             // 
@@ -152,6 +191,11 @@
             0,
             131072});
             this.TimingNum.Location = new System.Drawing.Point(83, 53);
+            this.TimingNum.Maximum = new decimal(new int[] {
+            99999,
+            0,
+            0,
+            0});
             this.TimingNum.Name = "TimingNum";
             this.TimingNum.Size = new System.Drawing.Size(120, 21);
             this.TimingNum.TabIndex = 1;
@@ -168,7 +212,7 @@
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(625, 22);
+            this.numericUpDown1.Location = new System.Drawing.Point(340, 813);
             this.numericUpDown1.Name = "numericUpDown1";
             this.numericUpDown1.Size = new System.Drawing.Size(35, 21);
             this.numericUpDown1.TabIndex = 3;
@@ -182,7 +226,7 @@
             // GuideLineText
             // 
             this.GuideLineText.AutoSize = true;
-            this.GuideLineText.Location = new System.Drawing.Point(623, 7);
+            this.GuideLineText.Location = new System.Drawing.Point(338, 798);
             this.GuideLineText.Name = "GuideLineText";
             this.GuideLineText.Size = new System.Drawing.Size(95, 12);
             this.GuideLineText.TabIndex = 4;
@@ -192,11 +236,11 @@
             // 
             this.numericUpDown2.DecimalPlaces = 2;
             this.numericUpDown2.Increment = new decimal(new int[] {
-            1,
+            5,
             0,
             0,
             65536});
-            this.numericUpDown2.Location = new System.Drawing.Point(561, 22);
+            this.numericUpDown2.Location = new System.Drawing.Point(279, 813);
             this.numericUpDown2.Maximum = new decimal(new int[] {
             10,
             0,
@@ -214,13 +258,13 @@
             5,
             0,
             0,
-            65536});
+            0});
             this.numericUpDown2.ValueChanged += new System.EventHandler(this.numericUpDown2_ValueChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(559, 8);
+            this.label1.Location = new System.Drawing.Point(277, 798);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(37, 12);
             this.label1.TabIndex = 7;
@@ -228,57 +272,27 @@
             // 
             // Play
             // 
-            this.Play.Location = new System.Drawing.Point(44, 23);
+            this.Play.Location = new System.Drawing.Point(719, 16);
             this.Play.Name = "Play";
             this.Play.Size = new System.Drawing.Size(34, 34);
             this.Play.TabIndex = 8;
             this.Play.Text = "▶";
             this.Play.UseVisualStyleBackColor = true;
-            // 
-            // DeleteNote
-            // 
-            this.DeleteNote.Enabled = false;
-            this.DeleteNote.Location = new System.Drawing.Point(122, 197);
-            this.DeleteNote.Name = "DeleteNote";
-            this.DeleteNote.Size = new System.Drawing.Size(75, 23);
-            this.DeleteNote.TabIndex = 8;
-            this.DeleteNote.Text = "Delete";
-            this.DeleteNote.UseVisualStyleBackColor = true;
-            this.DeleteNote.Click += new System.EventHandler(this.DeleteNote_Click);
-            // 
-            // NoteInfoText
-            // 
-            this.NoteInfoText.AutoSize = true;
-            this.NoteInfoText.Location = new System.Drawing.Point(11, 13);
-            this.NoteInfoText.Name = "NoteInfoText";
-            this.NoteInfoText.Size = new System.Drawing.Size(55, 12);
-            this.NoteInfoText.TabIndex = 9;
-            this.NoteInfoText.Text = "Note Info";
-            // 
-            // DeleteLocker
-            // 
-            this.DeleteLocker.Font = new System.Drawing.Font("Gulim", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.DeleteLocker.Location = new System.Drawing.Point(92, 197);
-            this.DeleteLocker.Name = "DeleteLocker";
-            this.DeleteLocker.Size = new System.Drawing.Size(24, 23);
-            this.DeleteLocker.TabIndex = 10;
-            this.DeleteLocker.Text = "🔒";
-            this.DeleteLocker.UseVisualStyleBackColor = true;
-            this.DeleteLocker.Click += new System.EventHandler(this.DeleteLocker_Click);
+            this.Play.Click += new System.EventHandler(this.Play_Click);
             // 
             // vScrollBar1
             // 
             this.vScrollBar1.Cursor = System.Windows.Forms.Cursors.SizeNS;
-            this.vScrollBar1.Location = new System.Drawing.Point(21, 63);
+            this.vScrollBar1.Location = new System.Drawing.Point(0, -1);
             this.vScrollBar1.Maximum = 1000;
             this.vScrollBar1.Name = "vScrollBar1";
-            this.vScrollBar1.Size = new System.Drawing.Size(20, 600);
+            this.vScrollBar1.Size = new System.Drawing.Size(20, 794);
             this.vScrollBar1.TabIndex = 9;
             this.vScrollBar1.Value = 1000;
             // 
             // SongInfo
             // 
-            this.SongInfo.Location = new System.Drawing.Point(1062, 12);
+            this.SongInfo.Location = new System.Drawing.Point(785, 16);
             this.SongInfo.Name = "SongInfo";
             this.SongInfo.Size = new System.Drawing.Size(140, 38);
             this.SongInfo.TabIndex = 10;
@@ -286,43 +300,125 @@
             this.SongInfo.UseVisualStyleBackColor = true;
             this.SongInfo.Click += new System.EventHandler(this.SongInfo_Click);
             // 
-            // trackBar1
+            // BSnapTrackBar
             // 
-            this.trackBar1.AutoSize = false;
-            this.trackBar1.Location = new System.Drawing.Point(433, 23);
-            this.trackBar1.Maximum = 7;
-            this.trackBar1.Name = "trackBar1";
-            this.trackBar1.Size = new System.Drawing.Size(104, 20);
-            this.trackBar1.TabIndex = 11;
-            this.trackBar1.Value = 3;
-            this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
+            this.BSnapTrackBar.AutoSize = false;
+            this.BSnapTrackBar.Location = new System.Drawing.Point(162, 813);
+            this.BSnapTrackBar.Maximum = 7;
+            this.BSnapTrackBar.Name = "BSnapTrackBar";
+            this.BSnapTrackBar.Size = new System.Drawing.Size(104, 20);
+            this.BSnapTrackBar.TabIndex = 11;
+            this.BSnapTrackBar.Value = 3;
+            this.BSnapTrackBar.Scroll += new System.EventHandler(this.trackBar1_Scroll);
             // 
-            // VerticalSnapText
+            // BeatSnapText
             // 
-            this.VerticalSnapText.AutoSize = true;
-            this.VerticalSnapText.Location = new System.Drawing.Point(431, 7);
-            this.VerticalSnapText.Name = "VerticalSnapText";
-            this.VerticalSnapText.Size = new System.Drawing.Size(80, 12);
-            this.VerticalSnapText.TabIndex = 12;
-            this.VerticalSnapText.Text = "Vertical Snap";
+            this.BeatSnapText.AutoSize = true;
+            this.BeatSnapText.Location = new System.Drawing.Point(160, 798);
+            this.BeatSnapText.Name = "BeatSnapText";
+            this.BeatSnapText.Size = new System.Drawing.Size(63, 12);
+            this.BeatSnapText.TabIndex = 12;
+            this.BeatSnapText.Text = "Beat Snap";
             // 
-            // VSnapIndecator
+            // BSnapIndecator
             // 
-            this.VSnapIndecator.AutoSize = true;
-            this.VSnapIndecator.Location = new System.Drawing.Point(504, 45);
-            this.VSnapIndecator.Name = "VSnapIndecator";
-            this.VSnapIndecator.Size = new System.Drawing.Size(23, 12);
-            this.VSnapIndecator.TabIndex = 13;
-            this.VSnapIndecator.Text = "1/4";
-            this.VSnapIndecator.TextAlign = System.Drawing.ContentAlignment.BottomRight;
+            this.BSnapIndecator.AutoSize = true;
+            this.BSnapIndecator.Location = new System.Drawing.Point(243, 836);
+            this.BSnapIndecator.Name = "BSnapIndecator";
+            this.BSnapIndecator.Size = new System.Drawing.Size(23, 12);
+            this.BSnapIndecator.TabIndex = 13;
+            this.BSnapIndecator.Text = "1/4";
+            this.BSnapIndecator.TextAlign = System.Drawing.ContentAlignment.BottomRight;
+            // 
+            // PositionText
+            // 
+            this.PositionText.Location = new System.Drawing.Point(13, 800);
+            this.PositionText.Name = "PositionText";
+            this.PositionText.Size = new System.Drawing.Size(58, 12);
+            this.PositionText.TabIndex = 14;
+            this.PositionText.Text = "Position";
+            // 
+            // SmallBeat
+            // 
+            this.SmallBeat.DecimalPlaces = 2;
+            this.SmallBeat.Increment = new decimal(new int[] {
+            5,
+            0,
+            0,
+            131072});
+            this.SmallBeat.Location = new System.Drawing.Point(60, 815);
+            this.SmallBeat.Maximum = new decimal(new int[] {
+            4,
+            0,
+            0,
+            0});
+            this.SmallBeat.Minimum = new decimal(new int[] {
+            5,
+            0,
+            0,
+            -2147352576});
+            this.SmallBeat.Name = "SmallBeat";
+            this.SmallBeat.Size = new System.Drawing.Size(48, 21);
+            this.SmallBeat.TabIndex = 15;
+            this.SmallBeat.ValueChanged += new System.EventHandler(this.SmallBeat_ValueChanged);
+            // 
+            // LargeBeat
+            // 
+            this.LargeBeat.Location = new System.Drawing.Point(13, 815);
+            this.LargeBeat.Maximum = new decimal(new int[] {
+            999999,
+            0,
+            0,
+            0});
+            this.LargeBeat.Minimum = new decimal(new int[] {
+            2,
+            0,
+            0,
+            -2147483648});
+            this.LargeBeat.Name = "LargeBeat";
+            this.LargeBeat.Size = new System.Drawing.Size(41, 21);
+            this.LargeBeat.TabIndex = 16;
+            this.LargeBeat.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            -2147483648});
+            this.LargeBeat.ValueChanged += new System.EventHandler(this.LargeBeat_ValueChanged);
+            // 
+            // SaveBtn
+            // 
+            this.SaveBtn.Location = new System.Drawing.Point(855, 795);
+            this.SaveBtn.Name = "SaveBtn";
+            this.SaveBtn.Size = new System.Drawing.Size(75, 23);
+            this.SaveBtn.TabIndex = 17;
+            this.SaveBtn.Text = "Save";
+            this.SaveBtn.UseVisualStyleBackColor = true;
+            this.SaveBtn.Click += new System.EventHandler(this.SaveBtn_Click);
+            // 
+            // OpenBtn
+            // 
+            this.OpenBtn.Location = new System.Drawing.Point(855, 822);
+            this.OpenBtn.Name = "OpenBtn";
+            this.OpenBtn.Size = new System.Drawing.Size(75, 23);
+            this.OpenBtn.TabIndex = 18;
+            this.OpenBtn.Text = "Open";
+            this.OpenBtn.UseVisualStyleBackColor = true;
+            this.OpenBtn.Click += new System.EventHandler(this.OpenBtn_Click);
+            // 
+            // Position
+            // 
+            this.Position.Location = new System.Drawing.Point(719, 663);
+            this.Position.Name = "Position";
+            this.Position.Size = new System.Drawing.Size(100, 21);
+            this.Position.TabIndex = 19;
             // 
             // patternviewer
             // 
             this.patternviewer.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.patternviewer.DoubleBuffered = true;
-            this.patternviewer.Location = new System.Drawing.Point(44, 63);
+            this.patternviewer.Location = new System.Drawing.Point(23, -1);
             this.patternviewer.Name = "patternviewer";
-            this.patternviewer.Size = new System.Drawing.Size(800, 600);
+            this.patternviewer.Size = new System.Drawing.Size(690, 794);
             this.patternviewer.TabIndex = 5;
             this.patternviewer.Scroll += new System.Windows.Forms.ScrollEventHandler(this.patternviewer_Scroll);
             this.patternviewer.Paint += new System.Windows.Forms.PaintEventHandler(this.patternviewer_Paint);
@@ -335,13 +431,19 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1214, 699);
-            this.Controls.Add(this.VSnapIndecator);
-            this.Controls.Add(this.patternviewer);
-            this.Controls.Add(this.VerticalSnapText);
-            this.Controls.Add(this.trackBar1);
-            this.Controls.Add(this.SongInfo);
+            this.ClientSize = new System.Drawing.Size(942, 857);
             this.Controls.Add(this.vScrollBar1);
+            this.Controls.Add(this.Position);
+            this.Controls.Add(this.OpenBtn);
+            this.Controls.Add(this.SaveBtn);
+            this.Controls.Add(this.LargeBeat);
+            this.Controls.Add(this.SmallBeat);
+            this.Controls.Add(this.PositionText);
+            this.Controls.Add(this.BSnapIndecator);
+            this.Controls.Add(this.patternviewer);
+            this.Controls.Add(this.BeatSnapText);
+            this.Controls.Add(this.BSnapTrackBar);
+            this.Controls.Add(this.SongInfo);
             this.Controls.Add(this.Play);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.numericUpDown2);
@@ -359,7 +461,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.TimingNum)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBar1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.BSnapTrackBar)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SmallBeat)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.LargeBeat)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -386,9 +490,15 @@
         private System.Windows.Forms.Button DeleteLocker;
         private System.Windows.Forms.VScrollBar vScrollBar1;
         private System.Windows.Forms.Button SongInfo;
-        private System.Windows.Forms.TrackBar trackBar1;
-        private System.Windows.Forms.Label VerticalSnapText;
-        private System.Windows.Forms.Label VSnapIndecator;
+        private System.Windows.Forms.TrackBar BSnapTrackBar;
+        private System.Windows.Forms.Label BeatSnapText;
+        private System.Windows.Forms.Label BSnapIndecator;
+        private System.Windows.Forms.Label PositionText;
+        private System.Windows.Forms.NumericUpDown SmallBeat;
+        private System.Windows.Forms.NumericUpDown LargeBeat;
+        private System.Windows.Forms.Button SaveBtn;
+        private System.Windows.Forms.Button OpenBtn;
+        private System.Windows.Forms.TextBox Position;
     }
 }
 

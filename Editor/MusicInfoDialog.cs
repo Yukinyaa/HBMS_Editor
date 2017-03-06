@@ -17,11 +17,17 @@ namespace Editor
         {
             InitializeComponent();
             hb = hbms;
+
         }
 
         private void MusicInfoDialog_Load(object sender, EventArgs e)
         {
-            
+            Title.Text = hb.title;
+            Genre.Text = hb.genre;
+            BPM.Value = (decimal)hb.bpm;
+            audioDir.Text = hb.audioDir;
+            Rank.Value = (decimal)hb.rank;
+            RankText.Text = hb.rankText;
         }
 
         private void Title_TextChanged(object sender, EventArgs e)

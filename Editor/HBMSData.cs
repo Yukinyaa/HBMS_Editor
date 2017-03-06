@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
+
+
+
 namespace Editor
 {
     public enum NoteType
@@ -49,6 +52,7 @@ namespace Editor
         }
     }
 
+    
 
     public class HBMSData
     {
@@ -60,7 +64,17 @@ namespace Editor
         public string title;
         public string genre;
         public double bpm;
-        public string audioDir;
+        public string audioDir {
+            get {
+                return audioDir_;
+            }
+            set {
+                SeqPlayer = new Player(value);
+                audioDir_ = value;
+            }
+
+        }
+        public string audioDir_;
         public double rank;
         public string rankText;
         public List<HitSound> hitsounds;
@@ -86,14 +100,48 @@ namespace Editor
             List<Note> noteList = new List<Note>();
             foreach (Note note in notes)
             {
-                if ((segment <= note.timing) || (note.timing <= segment))
+                if ((segment <= note.timing) || (note.timing <= segment+length))
                 {
                     noteList.Add(note);
                 }
             }
             return noteList;
         }
+        public Player SeqPlayer;
+        public class Player
+        {
+            MediaPlayer.MediaPlayerClass player;
+            public Player(string dir)
+            {
+                player = new MediaPlayer.MediaPlayerClass();
+                player.FileName = dir;
+                player.Stop();
+            }
+            public void Play(double time=0)
+            {
+                player.CurrentPosition = time;
+                if (player.PlayState != MediaPlayer.MPPlayStateConstants.mpPlaying)
+                {
+                    player.Play();
+                }
+            }
+            public void Stop()
+            {
+                player.Stop();
+            }
+            public double playTime//in seconds
+            {
+                get { return player.CurrentPosition; }
+            }
+            public bool isPlaying
+            {
+                get { return player.PlayState == MediaPlayer.MPPlayStateConstants.mpPlaying; }
+            }
+
+        }
     }
+
+
     class Encoder
     {
         class MidProcessHBMSData
@@ -108,7 +156,7 @@ namespace Editor
             public List<string> notes;
         }
 
-        String encode(HBMSData data)
+        static public String encode(HBMSData data)
         {
             MidProcessHBMSData mpdata = new MidProcessHBMSData();
             mpdata.title = data.title;
@@ -139,7 +187,7 @@ namespace Editor
             }
             return JsonConvert.SerializeObject(mpdata);
         }
-        HBMSData decode(String datastr)
+        static public HBMSData decode(String datastr)
         {
             MidProcessHBMSData mpdata = JsonConvert.DeserializeObject<MidProcessHBMSData>(datastr);
             HBMSData data = new HBMSData();
@@ -156,10 +204,10 @@ namespace Editor
                 switch ((NoteType)(note.ToList()[0]-'0'))
                 {
                     case NoteType.ShortNote:
-                        data.notes.Add((Note)JsonConvert.DeserializeObject<ShortNote>(note));
+                        data.notes.Add((Note)JsonConvert.DeserializeObject<ShortNote>(note.Substring(1)));
                         break;
                     case NoteType.SlideLongNote:
-                        data.notes.Add((Note)JsonConvert.DeserializeObject<SlideLongNote>(note));
+                        data.notes.Add((Note)JsonConvert.DeserializeObject<SlideLongNote>(note.Substring(1)));
                         break;
                     /*case NoteType.TrackNote:
                         data.notes.Add((Note)JsonConvert.DeserializeObject<TrackNote>(note));

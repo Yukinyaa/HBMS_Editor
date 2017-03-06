@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -15,9 +16,11 @@ namespace Editor
     {
         HBMSData hbd;
 
-        double now=0;
-        double scale = 0.5;
+        public double now;
 
+        double scale = 5;
+        static MainEditor instance;
+        public bool loaded = false;
         public MainEditor()
         {
             InitializeComponent();
@@ -40,7 +43,10 @@ namespace Editor
             NoteTypeSelector.Items.Add("Dynamic");
             NoteTypeSelector.SetItemChecked(0, true);
 
+            //Application.Idle += HandleApplicationIdle;
             this.DoubleBuffered = true;
+            now = -8;
+            instance = this;
             //patternviewer.DoubleBuffered = true;
         }
         
@@ -82,11 +88,34 @@ namespace Editor
         private void DrawGuideLine(Graphics g)
         {
             Pen borderlinedrawer = new Pen(Color.White, 0.5f);
+            
             for (int i = 0; i < numericUpDown1.Value; i++)
             {
                 int x = patternviewer.Width * (i + 1) / ((int)numericUpDown1.Value + 1);
                 g.DrawLine(borderlinedrawer, x, 0, x, patternviewer.Height);
-            }
+            }//Horizontal guideline
+            
+            int beat = ((int)(now * 48 / bsnapcnt)) * bsnapcnt;
+            double l = beat / 48d;
+            while (beat < 0) beat += 48;
+            for (; l < now + scale; l += 1d / 48d)
+            {
+                Pen linedrawer;
+                beat %= 48;//detect beat
+                if (beat % (48/bsnapcnt) != 0)
+                {
+                    beat++;
+                    continue;
+                }
+                    
+                if (beat==0 && now%4<0.1d)
+                    linedrawer = new Pen(BeatSnapColor.col[beat], 3);
+                else
+                    linedrawer = new Pen(BeatSnapColor.col[beat], 0.5f);
+                int y = TimingToY(l);
+                g.DrawLine(linedrawer, 0, y, patternviewer.Width, y);
+                beat++;
+            }//vertical(beat)guideline
         }
 
         private void DrawLongNotes(Graphics g)
@@ -98,7 +127,8 @@ namespace Editor
         {
             foreach (Note n in notes)
             {
-                DrawNote(g,n);
+                if ((now <= n.timing) && (n.timing <= now + scale))
+                    DrawNote(g,n);
             }
         }
 
@@ -156,29 +186,34 @@ namespace Editor
 
         private void patternviewer_Paint(object sender, PaintEventArgs e)
         {
+            loaded = true;
+           
             //draw guideline
 
             notes = hbd.GetNote(now, scale);
-
-            //Bitmap buffer = new Bitmap(patternviewer.Width, patternviewer.Height);//set the size of the image
-            //Graphics g = Graphics.FromImage(buffer);//set the graphics to draw on the image
+            
             Graphics g = e.Graphics;
             DrawGuideLine(g);
             DrawLongNotes(g);
             DrawNotes(g, notes);
             DrawImaginaryNote(g);
-            //.DrawImage(buffer,new Point(0,0));
         }
 
-        private void ReDraw()
+        public void ReDraw()
         {
+            //update
+            if (instance.hbd.SeqPlayer.isPlaying)
+            {
+                now = BeatToTime(instance.hbd.SeqPlayer.playTime);
+                UpdateBeatValue();
+            }
+            
             patternviewer.Refresh();
-            patternviewer.Focus();
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            ReDraw();
+            
         }
 
         private void patternviewer_Scroll(object sender, ScrollEventArgs e)
@@ -194,7 +229,6 @@ namespace Editor
                     now -=scale/2;
                     break;
             }
-            ReDraw();
         }
         
         //viewer : mouse hadling part
@@ -216,13 +250,13 @@ namespace Editor
         Point clickstart;
         private void patternviewer_MouseDown(object sender, MouseEventArgs e)
         {
+            patternviewer.Focus();
             if (e.Button == MouseButtons.Right)
             {
                 dragging = false;
                 newnote = false;
                 DraggingNote = null;
                 SelectedNote = null;
-                ReDraw();
                 return;
             }
             if (e.Button != MouseButtons.Left)
@@ -234,15 +268,13 @@ namespace Editor
                 {
                     SelectedNote = n;
                     DraggingNote = n.Copy(n);
-
-                    ReDraw();
+                    
                     return;
                 }
             }
             newnote = true;
             dragging = true;
             DraggingNote = NewNote(e.X, e.Y);
-            ReDraw();
 
         }
 
@@ -258,7 +290,6 @@ namespace Editor
             if (dragging)
             {
                 draggingDelta = new Point(dx, dy);
-                ReDraw();
             }
         }
 
@@ -268,6 +299,15 @@ namespace Editor
             
             if (DraggingNote == null)
                 return;
+            if (YToTiming(e.Location.Y) < 0)
+            {
+                dragging = false;
+                newnote = false;
+                DraggingNote = null;
+                SelectedNote = null;
+                MessageBox.Show("Note cannot be outside of the map. \n (timing cannot be smaller then 0)");
+                return;
+            }
             int dx = (e.Location.X - clickstart.X), dy = (e.Location.Y - clickstart.Y);
             int diff = Math.Abs(dx) + Math.Abs(dy);
             if (newnote)
@@ -288,13 +328,11 @@ namespace Editor
             SelectedNote.timing = YToTiming(TimingToY(SelectedNote.timing) +dy);
             DraggingNote = null;
             dragging = false;
-            ReDraw();
         }
 
         private void numericUpDown2_ValueChanged(object sender, EventArgs e)
         {
             scale = (double)numericUpDown2.Value;
-            ReDraw();
         }
 
         void UpdateSelectedNoteToPanel()
@@ -321,13 +359,11 @@ namespace Editor
         private void Widthnum_ValueChanged(object sender, EventArgs e)
         {
             SelectedNote.width = (double)Widthnum.Value;
-            ReDraw();
         }
 
         private void Posnum_ValueChanged(object sender, EventArgs e)
         {
             SelectedNote.startpos = (double)Posnum.Value;
-            ReDraw();
         }
 
         Thread LockTimer;
@@ -358,7 +394,6 @@ namespace Editor
             newnote = false;
             DraggingNote = null;
             SelectedNote = null;
-            ReDraw();
         }
 
         private void patternviewer_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -370,7 +405,6 @@ namespace Editor
                 newnote = false;
                 DraggingNote = null;
                 SelectedNote = null;
-                ReDraw();
             }
             
         }
@@ -386,9 +420,131 @@ namespace Editor
             mid.Show();
         }
 
+
+        List<int> BSnapAmount = new List<int>()
+        {
+            1,2,3,4,6,8,12,16
+        };
+        int bsnapcnt=4;
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
+            bsnapcnt = BSnapAmount[BSnapTrackBar.Value];
+
+            BSnapIndecator.Text = "1/" + bsnapcnt;
 
         }
+
+        bool lockupdate = false;
+        private void LargeBeat_ValueChanged(object sender, EventArgs e)
+        {
+            if (lockupdate) return;
+
+            now = (double)LargeBeat.Value * 4 + (double)SmallBeat.Value;
+        }
+
+        private void SmallBeat_ValueChanged(object sender, EventArgs e)
+        {
+            if (lockupdate) return;
+
+            lockupdate = true;
+            if (SmallBeat.Value >= 4)
+            {
+                SmallBeat.Value -= 4;
+                LargeBeat.Value += 1;
+            }
+            else if (SmallBeat.Value < 0)
+            {
+                SmallBeat.Value += 4;
+                LargeBeat.Value -= 1;
+            }
+            lockupdate = false;
+            now = (double)LargeBeat.Value * 4 + (double)SmallBeat.Value;
+        }
+
+        private void UpdateBeatValue()
+        {
+            lockupdate = true;
+            LargeBeat.Value = (int)(now / 4);
+            SmallBeat.Value = (decimal)(now % 4);
+            lockupdate = false;
+        }
+
+        private void SaveBtn_Click(object sender, EventArgs e)
+        {
+            Stream myStream;
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+
+            saveFileDialog1.Filter = "HBMS files (*.hbms)|*.hbms|All files (*.*)|*.*";
+            saveFileDialog1.FilterIndex = 1;
+            saveFileDialog1.RestoreDirectory = true;
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                if ((myStream = saveFileDialog1.OpenFile()) != null)
+                {
+                    String str = Encoder.encode(hbd);
+                    Byte[] bt = Encoding.UTF8.GetBytes(str);
+                    myStream.Write(bt, 0, bt.Length);
+                    myStream.Close();
+                }
+            }
+        }
+        public static byte[] ReadFully(Stream input)
+        {
+            byte[] buffer = new byte[16 * 1024];
+            using (MemoryStream ms = new MemoryStream())
+            {
+                int read;
+                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    ms.Write(buffer, 0, read);
+                }
+                return ms.ToArray();
+            }
+        }
+
+        private void OpenBtn_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            openFileDialog1.Filter = "HBMS files (*.hbms)|*.hbms|All files (*.*)|*.*";
+            openFileDialog1.FilterIndex = 1;
+            openFileDialog1.Title = "Select a HBMS File";
+            
+            if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                byte[] bytearr = ReadFully(openFileDialog1.OpenFile());
+                string str = Encoding.Default.GetString(bytearr);
+
+                hbd = Encoder.decode(str);
+            }
+        }
+
+
+        double TimeToBeat(double time)
+        {
+            return time * 60 / hbd.bpm;
+        }
+        double BeatToTime(double beat)
+        {
+            return beat / 60 * hbd.bpm;
+        }
+
+        
+        private void Play_Click(object sender, EventArgs e)
+        {
+            if (hbd.SeqPlayer.isPlaying)
+            {
+                hbd.SeqPlayer.Stop();
+            }
+            else
+            {
+                instance.hbd.SeqPlayer.Play();
+            }
+            
+        }
+        //void HandleApplicationIdle(object sender, EventArgs e)
+        //{
+        //   ReDraw();
+        //}
     }
 }
