@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,39 +26,36 @@ namespace Editor
             Title.Text = hb.title;
             Genre.Text = hb.genre;
             BPM.Value = (decimal)hb.bpm;
-            audioDir.Text = hb.audioDir;
+            //audioDir.Text = hb.audioDir;
             Rank.Value = (decimal)hb.rank;
             RankText.Text = hb.rankText;
         }
 
-        private void Title_TextChanged(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
             hb.title = Title.Text;
-        }
-
-        private void Genre_TextChanged(object sender, EventArgs e)
-        {
+            hb.artist = ArtistText.Text;
+            //hb.preset = (double)PresetUpDown.Value;
             hb.genre = Genre.Text;
-        }
-
-        private void BPM_ValueChanged(object sender, EventArgs e)
-        {
             hb.bpm = (double)BPM.Value;
-        }
-
-        private void audioDir_TextChanged(object sender, EventArgs e)
-        {
-            hb.audioDir = audioDir.Text;
-        }
-
-        private void Rank_ValueChanged(object sender, EventArgs e)
-        {
             hb.rank = (double)Rank.Value;
+            hb.rankText = RankText.Text;
         }
 
-        private void RankText_TextChanged(object sender, EventArgs e)
+        private void button3_Click(object sender, EventArgs e)
         {
-            hb.rankText = RankText.Text;
+            MessageBox.Show("Warning!\nThis action will NOT save your file and change beatmap you are working on");
+            while (openFileDialog1.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+            {
+                MessageBox.Show("nope");
+            }
+            hb.title_ = Title.Text;
+            hb.artist_ = ArtistText.Text;
+            Directory.CreateDirectory(hb.mapdir);
+            
+            File.Copy(openFileDialog1.FileName, hb.mapdir + "/"+ Path.GetFileName(openFileDialog1.FileName));
+            
+            
         }
     }
 }

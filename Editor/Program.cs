@@ -22,15 +22,20 @@ namespace Editor
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             me = new MainEditor();
-            new Thread(() => Application.Run(me)).Start();
-            D d = () => me.ReDraw();
+            Thread t = new Thread(() => Application.Run(me));
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
+            D redraw = () => me.ReDraw();
+            D update = () => me.Update();
+
             Thread.Sleep(3000);
             try
             {
                 while (true)
                 {
-
-                    me.Invoke((Delegate)(d));
+                    //todo: 60frame
+                    me.Invoke((Delegate)(redraw));
+                    me.Invoke((Delegate)(update));
                     Thread.Sleep(20);
                 }
             }

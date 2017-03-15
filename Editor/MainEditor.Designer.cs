@@ -36,7 +36,7 @@
             this.width_pos_text = new System.Windows.Forms.Label();
             this.Posnum = new System.Windows.Forms.NumericUpDown();
             this.Widthnum = new System.Windows.Forms.NumericUpDown();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.HitsoundCombo = new System.Windows.Forms.ComboBox();
             this.hitSound_text = new System.Windows.Forms.Label();
             this.TimingNum = new System.Windows.Forms.NumericUpDown();
             this.TimingText = new System.Windows.Forms.Label();
@@ -87,14 +87,14 @@
             this.NoteInfoPanel.Controls.Add(this.width_pos_text);
             this.NoteInfoPanel.Controls.Add(this.Posnum);
             this.NoteInfoPanel.Controls.Add(this.Widthnum);
-            this.NoteInfoPanel.Controls.Add(this.comboBox1);
+            this.NoteInfoPanel.Controls.Add(this.HitsoundCombo);
             this.NoteInfoPanel.Controls.Add(this.hitSound_text);
             this.NoteInfoPanel.Controls.Add(this.TimingNum);
             this.NoteInfoPanel.Controls.Add(this.TimingText);
             this.NoteInfoPanel.Enabled = false;
             this.NoteInfoPanel.Location = new System.Drawing.Point(719, 74);
             this.NoteInfoPanel.Name = "NoteInfoPanel";
-            this.NoteInfoPanel.Size = new System.Drawing.Size(206, 303);
+            this.NoteInfoPanel.Size = new System.Drawing.Size(211, 303);
             this.NoteInfoPanel.TabIndex = 2;
             // 
             // DeleteLocker
@@ -165,13 +165,13 @@
             this.Widthnum.TabIndex = 4;
             this.Widthnum.ValueChanged += new System.EventHandler(this.Widthnum_ValueChanged);
             // 
-            // comboBox1
+            // HitsoundCombo
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(83, 80);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(121, 20);
-            this.comboBox1.TabIndex = 3;
+            this.HitsoundCombo.FormattingEnabled = true;
+            this.HitsoundCombo.Location = new System.Drawing.Point(83, 80);
+            this.HitsoundCombo.Name = "HitsoundCombo";
+            this.HitsoundCombo.Size = new System.Drawing.Size(121, 20);
+            this.HitsoundCombo.TabIndex = 3;
             // 
             // hitSound_text
             // 
@@ -420,6 +420,7 @@
             this.patternviewer.Name = "patternviewer";
             this.patternviewer.Size = new System.Drawing.Size(690, 794);
             this.patternviewer.TabIndex = 5;
+            this.patternviewer.AutoSizeChanged += new System.EventHandler(this.patternviewer_AutoSizeChanged);
             this.patternviewer.Scroll += new System.Windows.Forms.ScrollEventHandler(this.patternviewer_Scroll);
             this.patternviewer.Paint += new System.Windows.Forms.PaintEventHandler(this.patternviewer_Paint);
             this.patternviewer.MouseDown += new System.Windows.Forms.MouseEventHandler(this.patternviewer_MouseDown);
@@ -431,7 +432,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(942, 857);
+            this.AutoSize = true;
+            this.ClientSize = new System.Drawing.Size(1015, 857);
             this.Controls.Add(this.vScrollBar1);
             this.Controls.Add(this.Position);
             this.Controls.Add(this.OpenBtn);
@@ -452,7 +454,7 @@
             this.Controls.Add(this.NoteInfoPanel);
             this.Controls.Add(this.NoteTypeSelector);
             this.Name = "MainEditor";
-            this.Text = "Form1";
+            this.Text = "HBMS Editor";
             this.Scroll += new System.Windows.Forms.ScrollEventHandler(this.MainEditor_Scroll);
             this.NoteInfoPanel.ResumeLayout(false);
             this.NoteInfoPanel.PerformLayout();
@@ -483,7 +485,7 @@
         private System.Windows.Forms.Label width_pos_text;
         private System.Windows.Forms.NumericUpDown Posnum;
         private System.Windows.Forms.NumericUpDown Widthnum;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox HitsoundCombo;
         private System.Windows.Forms.Label hitSound_text;
         private System.Windows.Forms.Button DeleteNote;
         private System.Windows.Forms.Label NoteInfoText;

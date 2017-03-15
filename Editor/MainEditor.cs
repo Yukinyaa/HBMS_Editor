@@ -15,12 +15,22 @@ namespace Editor
     public partial class MainEditor : Form
     {
         HBMSData hbd;
+        PlayingData pd = new PlayingData();
+        public double now {
+            get {
+                return pd.now;
+            }
+            set {
+                pd.now = value;
+            }
 
-        public double now;
+        }
 
-        double scale = 5;
+
+        //double scale = 5;
         static MainEditor instance;
         public bool loaded = false;
+        
         public MainEditor()
         {
             InitializeComponent();
@@ -30,13 +40,13 @@ namespace Editor
             this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             this.SetStyle(ControlStyles.UserPaint, true);
 
-            hbd = new HBMSData();
+            hbd = new HBMSData("","");
             hbd.notes = new List<Note>();
             hbd.notes.Add(
                 new ShortNote(){ timing = 0.25, startpos = 0.25, width = 0.25 }
             );
-            hbd.bpm = 121;
-            hbd.audioDir = "D:/lel/Festival.mp3";
+            //hbd.bpm = 121;
+            //hbd.audioDir = "D:/lel/Festival.mp3";
             NoteTypeSelector.Items.Add("Short");
             NoteTypeSelector.Items.Add("Slide-Long");
             NoteTypeSelector.Items.Add("Track");
@@ -48,6 +58,21 @@ namespace Editor
             now = -8;
             instance = this;
             //patternviewer.DoubleBuffered = true;
+            pd.height = patternviewer.Height;
+            pd.width = patternviewer.Width;
+            pd.scale = 5;
+            pd.bsnapcnt = 4;
+            pd.hsnapcnt = 3;
+
+            try
+            {
+                Directory.GetDirectories("./Songs");
+            }
+            catch (System.IO.DirectoryNotFoundException)
+            {
+                MessageBox.Show("Creating Songs Directory..!");
+                Directory.CreateDirectory("./Songs");
+            }
         }
         
         private void NoteTypeSelector_ItemCheck(object sender, ItemCheckEventArgs e)
@@ -79,108 +104,14 @@ namespace Editor
             }
             n.startpos = (double)x / patternviewer.Width - 0.1;
             n.width = 0.2;
-            n.timing = YToTiming(y);
+            n.timing = MusicMath.YToTiming(y,pd);
 
             return n;
         }
 
 
-        private void DrawGuideLine(Graphics g)
-        {
-            Pen borderlinedrawer = new Pen(Color.White, 0.5f);
-            
-            for (int i = 0; i < numericUpDown1.Value; i++)
-            {
-                int x = patternviewer.Width * (i + 1) / ((int)numericUpDown1.Value + 1);
-                g.DrawLine(borderlinedrawer, x, 0, x, patternviewer.Height);
-            }//Horizontal guideline
-            
-            int beat = ((int)(now * 48 / bsnapcnt)) * bsnapcnt;
-            double l = beat / 48d;
-            while (beat < 0) beat += 48;
-            for (; l < now + scale; l += 1d / 48d)
-            {
-                Pen linedrawer;
-                beat %= 48;//detect beat
-                if (beat % (48/bsnapcnt) != 0)
-                {
-                    beat++;
-                    continue;
-                }
-                    
-                if (beat==0 && now%4<0.1d)
-                    linedrawer = new Pen(BeatSnapColor.col[beat], 3);
-                else
-                    linedrawer = new Pen(BeatSnapColor.col[beat], 0.5f);
-                int y = TimingToY(l);
-                g.DrawLine(linedrawer, 0, y, patternviewer.Width, y);
-                beat++;
-            }//vertical(beat)guideline
-        }
+        
 
-        private void DrawLongNotes(Graphics g)
-        {
-
-        }
-
-        private void DrawNotes(Graphics g, List<Note> notes)
-        {
-            foreach (Note n in notes)
-            {
-                if ((now <= n.timing) && (n.timing <= now + scale))
-                    DrawNote(g,n);
-            }
-        }
-
-        private int TimingToY(double timing)
-        {
-            return patternviewer.Height - (int)((timing - now) * patternviewer.Height / scale);
-        }
-
-        private double YToTiming(int y)
-        {
-            return (patternviewer.Height - y) * scale / patternviewer.Height + now;
-        }
-
-        private Rectangle RectFromNote(Note n, int dx = 0, int dy = 0)
-        {
-            return new Rectangle(
-                (int)(n.startpos * patternviewer.Width)+dx,
-                TimingToY(n.timing) - 40+dy,
-                (int)(n.width * patternviewer.Width),
-                40
-            );
-        }
-
-        private void DrawNote(Graphics g, Note n, object color = null, int dx = 0, int dy = 0)
-        {
-            Color c;
-            if (color==null) switch (n.type)
-            {//set color for default
-                case NoteType.ShortNote:
-                    c = Color.White;
-                    break;
-                case NoteType.SlideLongNote:
-                    c = Color.GreenYellow;
-                    break;
-                    default:
-                    c = Color.Red;
-                    break;
-            }
-            else c = (Color)color;
-
-            g.DrawRectangle(new Pen(c,2),RectFromNote(n,dx,dy));
-        }
-
-        private void DrawImaginaryNote(Graphics g)
-        {
-            //draw dragging note
-            if (dragging)
-                DrawNote(g, DraggingNote, Color.Gray, draggingDelta.X, draggingDelta.Y);
-            //draw selected note
-            if (SelectedNote != null)
-                g.DrawRectangle(new Pen(Color.Yellow, 1), RectFromNote(SelectedNote));
-        }
         
         List<Note> notes;
 
@@ -190,30 +121,43 @@ namespace Editor
            
             //draw guideline
 
-            notes = hbd.GetNote(now, scale);
+            notes = hbd.GetNote(now, pd.scale);
             
             Graphics g = e.Graphics;
-            DrawGuideLine(g);
-            DrawLongNotes(g);
-            DrawNotes(g, notes);
-            DrawImaginaryNote(g);
+            patternviewer.DrawGuideLine(g, pd);
+            patternviewer.DrawLongNotes(g, pd, notes);
+            patternviewer.DrawNotes(g, pd, notes);
+            patternviewer.DrawImaginaryNote(g, pd, DraggingNote, SelectedNote, dragging, draggingDelta);
         }
 
         public void ReDraw()
         {
-            //update
+            
+            patternviewer.Refresh();
+        }
+        public void MyUpdate()
+        {
             if (instance.hbd.SeqPlayer.isPlaying)
             {
                 now = BeatToTime(instance.hbd.SeqPlayer.playTime);
                 UpdateBeatValue();
             }
+            //todo: play hitsound
             
-            patternviewer.Refresh();
+        }
+        private void UpdateHitSound()
+        {
+            HitsoundCombo.Items.Clear();
+            HitsoundCombo.Items.Add(HBMSData.hitsoundnone);
+            foreach (String hitsound in hbd.hitsounds)
+            {
+                HitsoundCombo.Items.Add(hitsound);
+            }     
         }
 
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
-            
+            pd.hsnapcnt = (int)numericUpDown1.Value;
         }
 
         private void patternviewer_Scroll(object sender, ScrollEventArgs e)
@@ -222,11 +166,11 @@ namespace Editor
             {
                 case ScrollEventType.SmallDecrement:
                 case ScrollEventType.LargeDecrement:
-                    now+=scale/2;
+                    now += pd.scale / 2;
                     break;
                 case ScrollEventType.SmallIncrement:
                 case ScrollEventType.LargeIncrement:
-                    now -=scale/2;
+                    now -= pd.scale / 2;
                     break;
             }
         }
@@ -264,7 +208,7 @@ namespace Editor
             clickstart = e.Location;
             foreach (Note n in notes)
             {
-                if (RectFromNote(n).Contains(clickstart))
+                if (MusicMath.RectFromNote(n,pd).Contains(clickstart))
                 {
                     SelectedNote = n;
                     DraggingNote = n.Copy(n);
@@ -299,7 +243,7 @@ namespace Editor
             
             if (DraggingNote == null)
                 return;
-            if (YToTiming(e.Location.Y) < 0)
+            if (MusicMath.YToTiming(e.Location.Y,pd) < 0)
             {
                 dragging = false;
                 newnote = false;
@@ -325,14 +269,14 @@ namespace Editor
 
             
             SelectedNote.startpos += (double)(dx) / patternviewer.Width;
-            SelectedNote.timing = YToTiming(TimingToY(SelectedNote.timing) +dy);
+            SelectedNote.timing = MusicMath.YToTiming(MusicMath.TimingToY(SelectedNote.timing,pd) +dy,pd);
             DraggingNote = null;
             dragging = false;
         }
 
         private void numericUpDown2_ValueChanged(object sender, EventArgs e)
         {
-            scale = (double)numericUpDown2.Value;
+            pd.scale = (double)numericUpDown2.Value;
         }
 
         void UpdateSelectedNoteToPanel()
@@ -393,7 +337,7 @@ namespace Editor
             dragging = false;
             newnote = false;
             DraggingNote = null;
-            SelectedNote = null;
+            SelectedNote = null;    
         }
 
         private void patternviewer_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
@@ -425,12 +369,12 @@ namespace Editor
         {
             1,2,3,4,6,8,12,16
         };
-        int bsnapcnt=4;
+        //int bsnapcnt=4;
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
-            bsnapcnt = BSnapAmount[BSnapTrackBar.Value];
+            pd.bsnapcnt = BSnapAmount[BSnapTrackBar.Value];
 
-            BSnapIndecator.Text = "1/" + bsnapcnt;
+            BSnapIndecator.Text = "1/" + pd.bsnapcnt;
 
         }
 
@@ -541,6 +485,12 @@ namespace Editor
                 instance.hbd.SeqPlayer.Play();
             }
             
+        }
+
+        private void patternviewer_AutoSizeChanged(object sender, EventArgs e)
+        {
+            pd.height = patternviewer.Height;
+            pd.width = patternviewer.Width;
         }
         //void HandleApplicationIdle(object sender, EventArgs e)
         //{

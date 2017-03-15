@@ -4,9 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-
-
-
+using System.IO;
 
 namespace Editor
 {
@@ -56,14 +54,40 @@ namespace Editor
 
     public class HBMSData
     {
-        public class HitSound
+        public HBMSData(string title, string artist)
         {
-            public int num;
-            public string wav;
+            this.title_ = title;
+            this.artist_ = artist;
         }
-        public string title;
+        public string title_;
+        public string title {
+            get { return title_; }
+            set {
+                String olddir = mapdir;
+                title_ = value;
+                Directory.Move(olddir, mapdir);
+            }
+        }
         public string genre;
+        public string artist_;
+        public string artist
+        {
+            get { return artist_; }
+            set {
+                String olddir = mapdir;
+                artist_ = value;
+                Directory.Move(olddir, mapdir);
+            }
+
+        }
+        public string creator;
         public double bpm;
+        public string mapdir
+        {
+            get {
+                return "./Songs/" + artist + " - " + title;
+            }
+        }
         public string audioDir {
             get {
                 return audioDir_;
@@ -77,7 +101,7 @@ namespace Editor
         public string audioDir_;
         public double rank;
         public string rankText;
-        public List<HitSound> hitsounds;
+        public List<String> hitsounds;
         public List<Note> notes;
         private class NoteComparer : Comparer<Note>
         {
@@ -89,6 +113,23 @@ namespace Editor
                     0:
                     (int)diff;
             }
+        }
+
+        
+        public List<Player> hitsoundPlayers;
+        public const string hitsoundnone = "None";
+        public void updateSoundPlayers()
+        {
+            hitsoundPlayers = new List<Player>(hitsounds.Count);
+
+            for (int index = 0; index < hitsounds.Count; index++) 
+            {
+                if(hitsounds[index] == "")
+                    hitsoundPlayers.Add(new Player(hitsounds[0]));
+                else 
+                    hitsoundPlayers.Add(new Player(hitsounds[index]));
+            }
+            
         }
         public void SortNote()
         {
@@ -148,11 +189,13 @@ namespace Editor
         {
             public string title;
             public string genre;
+            public string artist;
+            public string creator;
             public double bpm;
             public string audioDir;
             public double rank;
             public string rankText;
-            public List<HBMSData.HitSound> hitsounds;
+            public List<String> hitsounds;
             public List<string> notes;
         }
 
@@ -162,6 +205,8 @@ namespace Editor
             mpdata.title = data.title;
             mpdata.genre = data.genre;
             mpdata.bpm = data.bpm;
+            mpdata.artist = data.artist;
+            mpdata.creator = data.creator;
             mpdata.audioDir = data.audioDir;
             mpdata.rank = data.rank;
             mpdata.rankText = data.rankText;
@@ -190,10 +235,11 @@ namespace Editor
         static public HBMSData decode(String datastr)
         {
             MidProcessHBMSData mpdata = JsonConvert.DeserializeObject<MidProcessHBMSData>(datastr);
-            HBMSData data = new HBMSData();
-            data.title = mpdata.title;
+            HBMSData data = new HBMSData(mpdata.title, mpdata.artist);
             data.genre = mpdata.genre;
             data.bpm = mpdata.bpm;
+            //todo: decode artist, map creator
+            data.creator = mpdata.creator;
             data.audioDir = mpdata.audioDir;
             data.rank = mpdata.rank;
             data.rankText = mpdata.rankText;
