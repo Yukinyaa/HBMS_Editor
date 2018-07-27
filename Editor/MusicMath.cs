@@ -13,7 +13,7 @@ namespace Editor
         public double now, scale;
         public int bsnapcnt, hsnapcnt;
     }
-    public class MusicMath
+    static public class MusicMath
     {
         static public int TimingToY(double timing, PlayingData pd)
         {

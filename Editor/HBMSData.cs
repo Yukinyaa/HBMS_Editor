@@ -23,13 +23,14 @@ namespace Editor
         public int hitSound;
         public double startpos, width;
 
-        public Note Copy(Note n)//copy note
+        static public Note Copy(Note n)//copy note
         {
-            Note newObject = new Note();
-
-            newObject.timing = n.timing;
-            newObject.startpos = n.startpos;
-            newObject.width = n.width;
+            Note newObject = new Note
+            {
+                timing = n.timing,
+                startpos = n.startpos,
+                width = n.width
+            };
 
 
             return newObject;
@@ -170,11 +171,11 @@ namespace Editor
             {
                 player.Stop();
             }
-            public double playTime//in seconds
+            public double PlayTime//in seconds
             {
                 get { return player.CurrentPosition; }
             }
-            public bool isPlaying
+            public bool IsPlaying
             {
                 get { return player.PlayState == MediaPlayer.MPPlayStateConstants.mpPlaying; }
             }
@@ -199,7 +200,7 @@ namespace Editor
             public List<string> notes;
         }
 
-        static public String encode(HBMSData data)
+        static public String Encode(HBMSData data)
         {
             MidProcessHBMSData mpdata = new MidProcessHBMSData();
             mpdata.title = data.title;
@@ -232,19 +233,21 @@ namespace Editor
             }
             return JsonConvert.SerializeObject(mpdata);
         }
-        static public HBMSData decode(String datastr)
+        static public HBMSData Decode(String datastr)
         {
             MidProcessHBMSData mpdata = JsonConvert.DeserializeObject<MidProcessHBMSData>(datastr);
-            HBMSData data = new HBMSData(mpdata.title, mpdata.artist);
-            data.genre = mpdata.genre;
-            data.bpm = mpdata.bpm;
-            //todo: decode artist, map creator
-            data.creator = mpdata.creator;
-            data.audioDir = mpdata.audioDir;
-            data.rank = mpdata.rank;
-            data.rankText = mpdata.rankText;
-            data.hitsounds = mpdata.hitsounds;
-            data.notes = new List<Note>();
+            HBMSData data = new HBMSData(mpdata.title, mpdata.artist)
+            {
+                genre = mpdata.genre,
+                bpm = mpdata.bpm,
+                //todo: decode artist, map creator
+                creator = mpdata.creator,
+                audioDir = mpdata.audioDir,
+                rank = mpdata.rank,
+                rankText = mpdata.rankText,
+                hitsounds = mpdata.hitsounds,
+                notes = new List<Note>()
+            };
             foreach (string note in mpdata.notes)
             {
                 switch ((NoteType)(note.ToList()[0]-'0'))

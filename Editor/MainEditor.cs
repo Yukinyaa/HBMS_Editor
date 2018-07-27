@@ -73,8 +73,20 @@ namespace Editor
                 MessageBox.Show("Creating Songs Directory..!");
                 Directory.CreateDirectory("./Songs");
             }
+            this.MouseWheel += new MouseEventHandler(Form1_MouseWheel);
         }
-        
+           
+
+        void Form1_MouseWheel(object sender, MouseEventArgs e)
+        { 
+            pd.now += e.Delta * pd.scale * 0.001f;
+            if (pd.now <= -99)
+                pd.now = -99;
+            UpdateBeatValue();
+        }
+
+
+
         private void NoteTypeSelector_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             for (int ix = 0; ix < NoteTypeSelector.Items.Count; ++ix)
@@ -127,7 +139,7 @@ namespace Editor
             patternviewer.DrawGuideLine(g, pd);
             patternviewer.DrawLongNotes(g, pd, notes);
             patternviewer.DrawNotes(g, pd, notes);
-            patternviewer.DrawImaginaryNote(g, pd, DraggingNote, SelectedNote, dragging, draggingDelta);
+            patternviewer.DrawImaginaryNote(g, pd, DraggingNote.FirstOrDefault(), SelectedNote.FirstOrDefault(), dragging, draggingDelta);
         }
 
         public void ReDraw()
@@ -137,9 +149,9 @@ namespace Editor
         }
         public void MyUpdate()
         {
-            if (instance.hbd.SeqPlayer.isPlaying)
+            if (instance.hbd.SeqPlayer.IsPlaying)
             {
-                now = BeatToTime(instance.hbd.SeqPlayer.playTime);
+                now = BeatToTime(instance.hbd.SeqPlayer.PlayTime);
                 UpdateBeatValue();
             }
             //todo: play hitsound
@@ -174,20 +186,11 @@ namespace Editor
                     break;
             }
         }
-        
+
         //viewer : mouse hadling part
 
-        Note DraggingNote;
-        private Note SelectedNote_;
-        private Note SelectedNote {
-            get {
-                return SelectedNote_;
-            }
-            set {
-                SelectedNote_ = value;
-                UpdateSelectedNoteToPanel();
-            }
-        }
+        List<Note> DraggingNote = new List<Note>();
+        private List<Note> SelectedNote = new List<Note>();
         bool dragging = false;
         bool newnote = false;
         Point draggingDelta;
@@ -199,8 +202,8 @@ namespace Editor
             {
                 dragging = false;
                 newnote = false;
-                DraggingNote = null;
-                SelectedNote = null;
+                DraggingNote.Clear();
+                SelectedNote.Clear();
                 return;
             }
             if (e.Button != MouseButtons.Left)
@@ -210,22 +213,21 @@ namespace Editor
             {
                 if (MusicMath.RectFromNote(n,pd).Contains(clickstart))
                 {
-                    SelectedNote = n;
-                    DraggingNote = n.Copy(n);
+                    SelectedNote.Add(n);
+                    DraggingNote.Add(Note.Copy(n));
                     
                     return;
                 }
             }
             newnote = true;
             dragging = true;
-            DraggingNote = NewNote(e.X, e.Y);
-
+            DraggingNote.Add(NewNote(e.X, e.Y));
         }
 
         private void patternviewer_MouseMove(object sender, MouseEventArgs e)
         {
             int dx = (e.Location.X - clickstart.X), dy = (e.Location.Y - clickstart.Y);
-            if (!dragging && DraggingNote!=null)
+            if (!dragging && DraggingNote.Count != 0)
             {
                 int diff = Math.Abs(dx) + Math.Abs(dy);
                 if (diff > 20)
@@ -239,16 +241,14 @@ namespace Editor
 
         private void patternviewer_MouseUp(object sender, MouseEventArgs e)
         {
-            
-            
-            if (DraggingNote == null)
+            if (DraggingNote.Count == 0)
                 return;
             if (MusicMath.YToTiming(e.Location.Y,pd) < 0)
             {
                 dragging = false;
                 newnote = false;
-                DraggingNote = null;
-                SelectedNote = null;
+                DraggingNote.Clear();
+                SelectedNote.Clear();
                 MessageBox.Show("Note cannot be outside of the map. \n (timing cannot be smaller then 0)");
                 return;
             }
@@ -256,20 +256,20 @@ namespace Editor
             int diff = Math.Abs(dx) + Math.Abs(dy);
             if (newnote)
             {
-                SelectedNote = DraggingNote;
-                hbd.notes.Add(DraggingNote);
+                SelectedNote.Add(DraggingNote.FirstOrDefault());
+                hbd.notes.Add(DraggingNote.FirstOrDefault());
                 newnote = false;
             }
             if (!dragging)//if dragging is just fraction of inch
             {
-                DraggingNote = null;
+                DraggingNote.Clear();
                 dragging = false;
                 return;//do nothing
             }
 
             
-            SelectedNote.startpos += (double)(dx) / patternviewer.Width;
-            SelectedNote.timing = MusicMath.YToTiming(MusicMath.TimingToY(SelectedNote.timing,pd) +dy,pd);
+            SelectedNote.FirstOrDefault().startpos += (double)(dx) / patternviewer.Width;
+            SelectedNote.FirstOrDefault().timing = MusicMath.YToTiming(MusicMath.TimingToY(SelectedNote.FirstOrDefault().timing,pd) +dy,pd);
             DraggingNote = null;
             dragging = false;
         }
@@ -281,33 +281,37 @@ namespace Editor
 
         void UpdateSelectedNoteToPanel()
         {
-            if (SelectedNote == null)
+            NoteInfoPanel.Enabled = true;
+
+            if (SelectedNote.Count == 1)
+            {
+                TimingNum.Value = (decimal)SelectedNote[0].timing;
+                Widthnum.Value = (decimal)SelectedNote[0].width;
+                Posnum.Value = (decimal)SelectedNote[0].startpos;
+            }
+            else if (SelectedNote == null)
             {
                 NoteInfoPanel.Enabled = false;
                 return;
             }
-
-            NoteInfoPanel.Enabled = true;
-            TimingNum.Value = (decimal)SelectedNote.timing;
-            Widthnum.Value = (decimal)SelectedNote.width;
-            Posnum.Value = (decimal)SelectedNote.startpos;
+            
             NoteInfoPanel.Refresh();
         }
 
         private void TimingNum_ValueChanged(object sender, EventArgs e)
         {
-            SelectedNote.timing = (double)TimingNum.Value;
+            SelectedNote[0].timing = (double)TimingNum.Value;
             ReDraw();
         }
 
         private void Widthnum_ValueChanged(object sender, EventArgs e)
         {
-            SelectedNote.width = (double)Widthnum.Value;
+            SelectedNote[0].width = (double)Widthnum.Value;
         }
 
         private void Posnum_ValueChanged(object sender, EventArgs e)
         {
-            SelectedNote.startpos = (double)Posnum.Value;
+            SelectedNote[0].startpos = (double)Posnum.Value;
         }
 
         Thread LockTimer;
@@ -333,7 +337,7 @@ namespace Editor
         }
         private void DeleteNote_Click(object sender, EventArgs e)
         {
-            hbd.notes.Remove(SelectedNote);
+            hbd.notes.Remove(SelectedNote[0]);
             dragging = false;
             newnote = false;
             DraggingNote = null;
@@ -344,7 +348,7 @@ namespace Editor
         {
             if (e.KeyCode == Keys.Delete && DeleteNote.Enabled == true)
             {
-                hbd.notes.Remove(SelectedNote);
+                hbd.notes.Remove(SelectedNote[0]);
                 dragging = false;
                 newnote = false;
                 DraggingNote = null;
@@ -355,7 +359,7 @@ namespace Editor
 
         private void MainEditor_Scroll(object sender, ScrollEventArgs e)
         {
-            
+
         }
 
         private void SongInfo_Click(object sender, EventArgs e)
@@ -426,7 +430,7 @@ namespace Editor
             {
                 if ((myStream = saveFileDialog1.OpenFile()) != null)
                 {
-                    String str = Encoder.encode(hbd);
+                    String str = Encoder.Encode(hbd);
                     Byte[] bt = Encoding.UTF8.GetBytes(str);
                     myStream.Write(bt, 0, bt.Length);
                     myStream.Close();
@@ -459,7 +463,7 @@ namespace Editor
                 byte[] bytearr = ReadFully(openFileDialog1.OpenFile());
                 string str = Encoding.Default.GetString(bytearr);
 
-                hbd = Encoder.decode(str);
+                hbd = Encoder.Decode(str);
             }
         }
 
@@ -476,7 +480,7 @@ namespace Editor
         
         private void Play_Click(object sender, EventArgs e)
         {
-            if (hbd.SeqPlayer.isPlaying)
+            if (hbd.SeqPlayer.IsPlaying)
             {
                 hbd.SeqPlayer.Stop();
             }
@@ -491,6 +495,11 @@ namespace Editor
         {
             pd.height = patternviewer.Height;
             pd.width = patternviewer.Width;
+        }
+
+        private void patternviewer_MouseClick(object sender, MouseEventArgs e)
+        {
+
         }
         //void HandleApplicationIdle(object sender, EventArgs e)
         //{

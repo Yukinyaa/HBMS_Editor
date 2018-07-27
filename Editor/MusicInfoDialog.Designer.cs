@@ -162,6 +162,7 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
+            this.openFileDialog1.Filter = "Music (.mp3)|*.mp3|ALL Files (*.*)|*.*";
             // 
             // textBox1
             // 
